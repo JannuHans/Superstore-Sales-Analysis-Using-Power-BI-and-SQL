@@ -1,11 +1,13 @@
-USE superstore_db;
-
-SELECT * FROM superstore;
-
+/*
+Superstore Sales Analysis SQL Insights
+-------------------------------------
+This script contains SQL queries to extract business insights from the Superstore sales dataset.
+Each query is preceded by a description of the business question it answers.
+Assumes a table named `superstore` with columns as described in the data dictionary.
+*/
 
 -- Q1) What percentage of total orders were shipped on the same date?
-
-
+-- Returns: Percentage of orders shipped on the same day as ordered.
 SELECT
     ROUND((COUNT(DISTINCT Order_ID) / (SELECT COUNT(DISTINCT Order_ID) AS total_orders FROM superstore)) * 100, 2) AS Same_Day_Shipping_Percentage
 FROM
@@ -13,10 +15,8 @@ FROM
 WHERE
     Order_Date = Ship_Date;
 
-
 -- Q2) Name top 3 customers with highest total value of orders?
-
-
+-- Returns: Customer_Name, TotalOrderValue for top 3 customers.
 SELECT
     Customer_Name,
     ROUND(SUM(sales), 3) AS TotalOrderValue
@@ -28,10 +28,8 @@ ORDER BY
     SUM(sales) DESC
 LIMIT 3;
 
-
 -- Q3) Find the top 5 items with the highest average sales per day?
-
-
+-- Returns: Product_ID, Average_Sales for top 5 products.
 SELECT
     Product_ID,
     ROUND(AVG(sales), 3) AS Average_Sales
@@ -43,11 +41,9 @@ ORDER BY
     Average_Sales DESC
 LIMIT 5;
 
-
--- Q4) Write a query to find the average order value for each customer, and rank the customers by their average order value? 
-
-
- SELECT
+-- Q4) Find the average order value for each customer, and rank the customers by their average order value.
+-- Returns: Customer_Name, avg_order_value, sales_rank.
+SELECT
     Customer_Name,
     ROUND(AVG(sales), 3) AS avg_order_value,
     DENSE_RANK() OVER (ORDER BY AVG(sales) DESC) AS sales_rank
@@ -56,11 +52,9 @@ FROM
 GROUP BY
     Customer_Name;
 
-
--- Q5) Give the name of customers who ordered highest and lowest orders from each city?
-
-
- WITH cte AS (
+-- Q5) Give the name of customers who ordered highest and lowest orders from each city.
+-- Returns: City, highest_order, highest_order_customer, lowest_order, lowest_order_customer.
+WITH cte AS (
     SELECT
         City,
         ROUND(MAX(sales), 4) AS highest_order,
@@ -109,10 +103,8 @@ INNER JOIN
 ORDER BY
     h.City;
 
-
 -- Q6) What is the most demanded sub-category in the west region?
-
-
+-- Returns: Sub_Category, total_quantity for the West region.
 SELECT
     Sub_Category,
     ROUND(SUM(sales), 3) AS total_quantity
@@ -126,10 +118,8 @@ ORDER BY
     total_quantity DESC
 LIMIT 1;
 
-
--- Q7) Which order has the highest number of items? 
-
-
+-- Q7) Which order has the highest number of items?
+-- Returns: order_id, num_item for the order with the most items.
 SELECT
     order_id,
     COUNT(order_id) AS num_item
@@ -141,10 +131,8 @@ ORDER BY
     num_item DESC
 LIMIT 1;
 
-
 -- Q8) Which order has the highest cumulative value?
-
-
+-- Returns: order_id, order_value for the highest value order.
 SELECT
     order_id,
     ROUND(SUM(sales), 3) AS order_value
@@ -156,10 +144,8 @@ ORDER BY
     order_value DESC
 LIMIT 1;
 
-
 -- Q9) Which segment’s order is more likely to be shipped via first class?
-
-
+-- Returns: segment, num_of_ordr for First Class shipping.
 SELECT
     segment,
     COUNT(order_id) AS num_of_ordr
@@ -172,10 +158,8 @@ GROUP BY
 ORDER BY
     num_of_ordr DESC;
 
-
 -- Q10) Which city is least contributing to total revenue?
-
-
+-- Returns: city, TotalSales for the lowest revenue city.
 SELECT
     city,
     ROUND(SUM(sales), 3) AS TotalSales
@@ -187,20 +171,15 @@ ORDER BY
     TotalSales ASC
 LIMIT 1;
 
-
 -- Q11) What is the average time for orders to get shipped after order is placed?
-
-
+-- Returns: avg_ship_time (in days).
 SELECT
     AVG(DATEDIFF(ship_date, order_date)) AS avg_ship_time
 FROM
     superstore;
 
-
-/* Q12) Which segment places the highest number of orders from each state 
-		and which segment places the largest individual orders from each state? */
-
-        
+-- Q12) Which segment places the highest number of orders from each state and which segment places the largest individual orders from each state?
+-- Returns: state, segment for highest number of orders per state.
 WITH cte AS (
     SELECT
         state,
@@ -221,12 +200,8 @@ FROM
 WHERE
     state_rank = 1;
 
-
-
-/* Q13) Find all the customers who individually ordered on 3 consecutive days 
-		where each day’s total order was more than 50 in value?*/
-
-
+-- Q13) Find all the customers who individually ordered on 3 consecutive days where each day’s total order was more than 50 in value.
+-- Returns: Customer_ID, Customer_Name for qualifying customers.
 WITH cte AS (
     SELECT
         Customer_ID,
@@ -253,11 +228,9 @@ FROM
 WHERE
     date_diff = 1;
 
-
--- Q14) Find the maximum number of days for which total sales on each day kept rising?
-
-
- WITH sales_sequence AS (
+-- Q14) Find the maximum number of days for which total sales on each day kept rising.
+-- Returns: max_rising_days (integer).
+WITH sales_sequence AS (
     SELECT
         Order_Date,
         SUM(Sales) AS TotalSales,
